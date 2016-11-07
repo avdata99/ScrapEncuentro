@@ -23,7 +23,7 @@ Los resultados [fueron ponderados segun día y hora](https://github.com/avdata99
 
 
 Esta visualización es un ejemplo de análisis básico:  
-https://plot.ly/~andresvazquez/10/
+https://plot.ly/~andresvazquez/10/  
 En las X está el puntaje 2016 (gestión Cambiemos), en Y el puntaje total 2013-2016 y el tamaño de cada burbuja es puntaje 2015 (gestión FPV).  
 
 Se podrían hacer otros análisis:  

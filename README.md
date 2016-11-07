@@ -3,7 +3,7 @@ Datos en base a scrape sobre la programación diaria del Canal de TV Encuentro (
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/avdata99/ScrapEncuentro/static/viz1test.png" width="350"/>
+  <img src="https://raw.githubusercontent.com/avdata99/ScrapEncuentro/master/static/viz1test.png" width="350"/>
 </p>
 
 La grilla se encuentra disponible en:  

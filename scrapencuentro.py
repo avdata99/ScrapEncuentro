@@ -174,7 +174,7 @@ with open("acumulado.csv", 'w') as csvfile:
 		writer.writerow(row)
 
 # para streamgraph mensual
-with open("viz/streamgraph1/encuentro-streamgraph-mes.csv", 'w') as csvfile:
+with open("viz/programas-por-mes/encuentro-streamgraph-mes.csv", 'w') as csvfile:
 	fieldnames = ["key", "value", "date"]
 
 	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -203,7 +203,7 @@ with open("viz/streamgraph1/encuentro-streamgraph-mes.csv", 'w') as csvfile:
 				writer.writerow(row)
 
 # para streamgraph anueal
-with open("viz/streamgraph1/encuentro-streamgraph-anio.csv", 'w') as csvfile:
+with open("viz/programas-por-anio/encuentro-streamgraph-anio.csv", 'w') as csvfile:
 	fieldnames = ["key", "value", "date"]
 
 	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -224,3 +224,60 @@ with open("viz/streamgraph1/encuentro-streamgraph-anio.csv", 'w') as csvfile:
 
 			row = {"key": p, "value": val, "date": anio}
 			writer.writerow(row)
+
+
+# Evolucion de los programas mas vistos en 2016 (Gestión Cambienos)
+with open("viz/historia-programas-mas-vistos-2016/mes.csv", 'w') as csvfile:
+	fieldnames = ["key", "value", "date"]
+
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+
+	for p in programas.keys():
+		a2013 = 0 if not "2013" in programas[p]['anios'] else programas[p]['anios']["2013"]["pts"]
+		a2014 = 0 if not "2014" in programas[p]['anios'] else programas[p]['anios']["2014"]["pts"]
+		a2015 = 0 if not "2015" in programas[p]['anios'] else programas[p]['anios']["2015"]["pts"]
+		a2016 = 0 if not "2016" in programas[p]['anios'] else programas[p]['anios']["2016"]["pts"]
+		if a2016 < 1200:  # solo los más importantes
+			continue;
+		for a in range(2013, 2017):
+			for m in range(1, 13):
+				if a == 2013 and m < 5:
+					continue
+				if a == 2016 and m > 10:
+					continue
+
+				mes = "{0}-{1:02d}-01".format(a, m)
+				mesdb = "{0}-{1:02d}".format(a, m)
+				val = 0 if not mesdb in programas[p]['meses'] else programas[p]['meses'][mesdb]["pts"]
+
+				row = {"key": p, "value": val, "date": mes}
+				writer.writerow(row)
+
+# Evolucion de los programas mas vistos en 2015 (Gestión FPV)
+with open("viz/historia-programas-mas-vistos-2015/mes.csv", 'w') as csvfile:
+	fieldnames = ["key", "value", "date"]
+
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+
+	for p in programas.keys():
+		a2013 = 0 if not "2013" in programas[p]['anios'] else programas[p]['anios']["2013"]["pts"]
+		a2014 = 0 if not "2014" in programas[p]['anios'] else programas[p]['anios']["2014"]["pts"]
+		a2015 = 0 if not "2015" in programas[p]['anios'] else programas[p]['anios']["2015"]["pts"]
+		a2016 = 0 if not "2016" in programas[p]['anios'] else programas[p]['anios']["2016"]["pts"]
+		if a2015 < 1500:  # solo los más importantes
+			continue;
+		for a in range(2013, 2017):
+			for m in range(1, 13):
+				if a == 2013 and m < 5:
+					continue
+				if a == 2016 and m > 10:
+					continue
+
+				mes = "{0}-{1:02d}-01".format(a, m)
+				mesdb = "{0}-{1:02d}".format(a, m)
+				val = 0 if not mesdb in programas[p]['meses'] else programas[p]['meses'][mesdb]["pts"]
+
+				row = {"key": p, "value": val, "date": mes}
+				writer.writerow(row)

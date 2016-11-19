@@ -17,6 +17,7 @@ from dateutil.relativedelta import relativedelta
 import requests
 import os
 import subprocess
+from slugify import slugify
 
 start_date = date(2013, 5, 1)
 end_date = date(2016, 11, 6)  # date.today()
@@ -103,6 +104,10 @@ while d <= end_date:
 					elif hora >= 21:
 						pts = 31
 					
+				if not programa_capitulo:
+					programa_capitulo = 'todo'
+				programa_base = slugify(programa_base)
+				
 				este = {"dia": dia, "mes": mes, "anio": anio,
 						"hora": hora, "minuto": partes[1],
 						"programa": programa_base,
@@ -281,3 +286,97 @@ with open("viz/historia-programas-mas-vistos-2015/mes.csv", 'w') as csvfile:
 
 				row = {"key": p, "value": val, "date": mes}
 				writer.writerow(row)
+
+
+# Analizar los capitulos de un programa en especial
+with open("viz/historia-programas-mas-vistos-2015/mes.csv", 'w') as csvfile:
+	fieldnames = ["key", "value", "date"]
+
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+
+	for p in programas.keys():
+		a2013 = 0 if not "2013" in programas[p]['anios'] else programas[p]['anios']["2013"]["pts"]
+		a2014 = 0 if not "2014" in programas[p]['anios'] else programas[p]['anios']["2014"]["pts"]
+		a2015 = 0 if not "2015" in programas[p]['anios'] else programas[p]['anios']["2015"]["pts"]
+		a2016 = 0 if not "2016" in programas[p]['anios'] else programas[p]['anios']["2016"]["pts"]
+		if a2015 < 1500:  # solo los más importantes
+			continue;
+		for a in range(2013, 2017):
+			for m in range(1, 13):
+				if a == 2013 and m < 5:
+					continue
+				if a == 2016 and m > 10:
+					continue
+
+				mes = "{0}-{1:02d}-01".format(a, m)
+				mesdb = "{0}-{1:02d}".format(a, m)
+				val = 0 if not mesdb in programas[p]['meses'] else programas[p]['meses'][mesdb]["pts"]
+
+				row = {"key": p, "value": val, "date": mes}
+				writer.writerow(row)
+
+# imprimir a CSVs separados para graficos stackeando capitulos por programa
+programas = {}
+"""
+{"dia": dia, "mes": mes, "anio": anio,
+	"hora": hora, "minuto": partes[1],
+	"programa": programa_base,
+	"capitulo": programa_capitulo,
+	"pts": pts}
+"""
+for p in finald:
+	if p["programa"] not in programas.keys():
+		programas[p["programa"]] = {}
+	if p["capitulo"] not in programas[p["programa"]].keys():
+		programas[p["programa"]][p["capitulo"]] = {}
+	mes = '{}-{}'.format(p["anio"], p["mes"])
+	if mes not in programas[p["programa"]][p["capitulo"]].keys():
+		programas[p["programa"]][p["capitulo"]][mes] = p['pts']
+	else:
+		programas[p["programa"]][p["capitulo"]][mes] += p['pts']
+
+base_path = 'viz/detalle-programas/data'
+# escribir la lista de programas
+csv_index = '{}/index.csv'.format(base_path)
+with open(csv_index, 'w') as csvfile:
+	fieldnames = ['file', 'name']
+
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+	ps = sorted(programas.keys())
+	for p in ps:
+		row = {'file': '{}.csv'.format(p), 'name': p}
+		writer.writerow(row)
+
+meses = []
+for a in range(2013, 2017):
+	for m in range(1, 13):
+		if a == 2013 and m < 5:
+			continue
+		if a == 2016 and m > 10:
+			continue
+		mes = "{0}-{1:02d}".format(a, m)
+		meses.append(mes)
+
+# escribir cada CSV
+for p in programas.keys():
+	csv_file = '{}/{}.csv'.format(base_path, p)
+	with open(csv_file, 'w') as csvfile:
+		capitulos = list(programas[p].keys())
+		print(capitulos)
+		fieldnames = ["mes"] + capitulos  # nombre programa, capitulo1, capitulo2, etc
+		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		writer.writeheader()
+		
+		for m in meses:
+			row = {"mes": m}
+			for c in capitulos:  # capitulos
+				if m not in programas[p][c].keys():
+					val = 0
+				else:
+					val = programas[p][c][m]
+				row[c] = val
+
+			writer.writerow(row)
+			

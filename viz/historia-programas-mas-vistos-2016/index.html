@@ -152,7 +152,7 @@ var graph = d3.csv(csvpath, function(data) {
     .attr("opacity", 1)
     .on("mouseover", function(d, i) {
       svg.selectAll(".layer").transition()
-      .duration(250)
+      .duration(450)
       .attr("opacity", function(d, j) {
         return j != i ? 0.6 : 1;
     })})
@@ -184,7 +184,7 @@ var graph = d3.csv(csvpath, function(data) {
     .on("mouseout", function(d, i) {
      svg.selectAll(".layer")
       .transition()
-      .duration(250)
+      .duration(450)
       .attr("opacity", "1");
       d3.select(this)
       .classed("hover", false)

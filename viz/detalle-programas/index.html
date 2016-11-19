@@ -1,0 +1,131 @@
+<html>
+  <head>
+    <script src="jquery2.1.4.min.js"></script>
+    <script src="jquery.csv.min.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+
+    <script type="text/javascript"> // load the visualisation API
+
+    var arrayData, data, title;
+    google.load('visualization', '1', { packages: ['corechart', 'controls'] });
+    google.setOnLoadCallback(loadIndex);
+
+    function loadIndex() {
+      $.get('data/index.csv', function(csvString) {
+          // transform the CSV string into a 2-dimensional array
+          csvs = $.csv.toArrays(csvString, {onParseValue: $.csv.hooks.castToScalar});
+          csvs.shift();  // quitar headers
+          $.each(csvs, function(i, row){
+            $("#select_file").append('<option value="data/' + row[0] + '"">' + row[1] + '</option>');
+          });
+          programa = getUrlParameter('programa');
+          anio = getUrlParameter('anio');
+          if (!programa) {
+            updateFile();
+          } else {
+            csvfile = 'data/' + programa + '.csv';
+            $("#select_file").val(csvfile);
+            if (anio) $("#select_year").val(anio);
+            updateFile();
+          }
+          
+       });
+    }
+
+
+    function loadCSV(csv_file, anio) {
+      $.get(csv_file, function(csvString) {
+          // transform the CSV string into a 2-dimensional array
+          arrayData = $.csv.toArrays(csvString, {onParseValue: $.csv.hooks.castToScalar});
+          title = csv_file.replace("data/", "").replace(".csv", "");
+          document.title = title;
+          updateChart(anio);
+       });
+    }
+
+    function drawVisualization() {
+       loadCSV("sample.csv", 0);
+      }
+
+    function updateChart(anio) {
+      filteredData = [arrayData[0]];
+      var c = 0;
+      $.each(arrayData, function(i, d){
+        if (c > 0) {
+          if (anio == 0 || d[0].startsWith(anio))
+          filteredData.push(d)
+          }
+        c += 1;
+        
+      });
+      
+      // this new DataTable object holds all the data
+      data = new google.visualization.arrayToDataTable(filteredData);
+      
+      // CAPACITY - En-route ATFM delay - YY - CHART
+      var crt_ertdlyYY = new google.visualization.ChartWrapper({
+         chartType: 'SteppedAreaChart', // 'LineChart',
+         containerId: 'crt_ertdlyYY',
+         dataTable: data,
+         options:{
+            width: 1100, height: 560,
+            title: title,
+            isStacked: true,
+            titleTextStyle : {color: 'grey', fontSize: 11},
+            // animation: {
+            //   duration: 1500,
+            //   easing: 'linear',
+            //   startup: true
+            // },
+
+
+         }
+      });
+      crt_ertdlyYY.draw();
+    }
+    // for select change
+    function updateFile() {
+      csv_file = $("#select_file option:selected").val();
+      title = csv_file.replace("data/", "").replace(".csv", "");
+      anio = $("#select_year option:selected").val();
+      var link = "index.html?programa=" + title + "&anio=" + anio;
+      history.replaceState(null, title, link);
+      loadCSV(csv_file, anio);      
+    }
+
+    function getUrlParameter(sParam) {
+      var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+          sURLVariables = sPageURL.split('&'),
+          sParameterName,
+          i;
+
+      for (i = 0; i < sURLVariables.length; i++) {
+          sParameterName = sURLVariables[i].split('=');
+
+          if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+      }
+
+    </script>
+
+  </head>
+  <body>
+    <p>Datos de los 763 programas detectados en pa programación de Canal Encuentro
+    entre 2013 y 2016. <a href="http://andresvazquez.com.ar/blog/datos-de-la-programacion-del-canal-encuentro-2013-2016/">+ info</a></p>
+    <p>De izquierda a derecha es la evolución temporal. Cada barra representa
+    la relevancia de cada programa cada mes. Están acumulados en cada barra 
+    los diferentes capítulos de ese programa.</p>
+    <select id='select_file' onChange='updateFile();'></select>
+    <select id='select_year' onChange='updateFile();'>
+      <option value=0>Toda la serie</option>
+      <option value=2013>2013</option>
+      <option value=2014>2014</option>
+      <option value=2015>2015</option>
+      <option value=2016>2016</option>
+    </select>
+
+    <div id="crt_ertdlyYY" style="width: 1200px; height: 600px;"></div>
+
+</html>
